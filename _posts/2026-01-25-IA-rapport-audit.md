@@ -1,74 +1,92 @@
 ---
-title: IA pour les rapports d'audit & pentest
+title: Automatiser les rapports de Pentest grâce à l’IA
 date: 2026-01-25
 categories: [Dev, Python]
 tags: [python, ia, pentest]
 ---
 
-# IA pour générer automatiquement des rapports de Pentest
+# Automatiser les rapports de Pentest grâce à l’IA
 
-## Pourquoi ce projet ?
+Récemment, j’ai eu l’occasion de réaliser un pentest sur une application web et un client lourd, dans le cadre d’un exercice avec un client fictif. Après avoir identifié plusieurs vulnérabilités, je me suis retrouvé face à la partie la plus fastidieuse : **rédiger le rapport d’audit complet**.  
 
-Récemment, j’ai réalisé un pentest sur une application web et un client lourd (dans le cadre d’un exercice avec un client fictif). Après avoir identifié plusieurs vulnérabilités, j’ai dû rédiger un rapport complet. C’est là que l’idée m’est venue : **et si l’on automatisait complètement la génération de rapports de pentest grâce à l’intelligence artificielle ?**  
-
-Les rapports d’audit demandent beaucoup de temps et d’attention, et chaque étape (collecte de données, organisation, rédaction et mise en forme) peut être automatisée avec des modèles d’IA. Le projet est donc né de cette volonté de **gagner du temps tout en garantissant la qualité et la confidentialité des informations**.
+C’est là que l’idée m’est venue : et si je pouvais utiliser l’intelligence artificielle pour automatiser l’ensemble du processus ? De la collecte des informations à la mise en page finale, tout en conservant la confidentialité des données.
 
 ---
 
-## Comment j’ai imaginé le projet
+## L’idée derrière le projet
 
-L’idée initiale était simple :
+L’objectif était simple : créer un outil capable de transformer des données brutes issues d’un pentest en un rapport professionnel, prêt à être remis à un client.  
 
-1. **Créer un template de projet** pour structurer les informations : description de l’application, scope, screenshots, vulnérabilités, etc.  
-2. **Parser toutes les données** collectées durant le pentest.  
-3. **Appeler différents modèles d’IA** pour générer les descriptions de vulnérabilités, les recommandations, et même intégrer les images pertinentes.  
-4. **Assembler toutes les informations** dans un rapport final au format Markdown et PDF.  
+Pour y arriver, j’ai imaginé un flux en plusieurs étapes :  
 
-L’objectif : un flux automatisé où l’utilisateur fournit les données brutes, et le système sort un rapport prêt à l’emploi, personnalisable si nécessaire.
+1. **Structurer les informations** dans un template projet : description de l’application, scope, captures d’écran, vulnérabilités…  
+2. **Parser les données collectées** durant le pentest.  
+3. **Exploiter différents modèles d’IA** pour générer automatiquement les descriptions de vulnérabilités, les recommandations et intégrer les images.  
+4. **Assembler le tout** dans un rapport final en Markdown et PDF, modifiable si besoin.  
+
+L’objectif : passer de la saisie manuelle et répétitive à un processus automatisé et fiable.
 
 ---
 
 ## Architecture du projet
 
-Voici le workflow global du projet :  
+Le pipeline que j’ai mis en place suit ce schéma :  
 
 ![Pipeline IA pour rapport de Pentest](/images/AI-pentest/pipeline.png)
 
+Concrètement, l’utilisateur fournit les données brutes du pentest et le programme s’occupe du reste : parsing, génération de texte, intégration des images et export en PDF.
+
 ---
 
-## Comment j’ai fait
+## Technologies et choix techniques
 
-Pour respecter la confidentialité et permettre une utilisation sur Mac (sans GPU puissant), j’ai choisi d’utiliser **Ollama** comme orchestrateur pour les modèles d’IA. Voici la stack utilisée :  
+Pour ce projet, il était essentiel de **travailler localement**, sans dépendre d’un service cloud, afin de garantir la confidentialité des informations sensibles. J’ai donc choisi Ollama comme orchestrateur pour mes modèles d’IA.  
+
+La stack utilisée :  
 
 - **Python 3.10+**  
-- **Ollama** pour gérer et exécuter les modèles localement  
-- **Modèles IA utilisés** :  
-  - `gpt-oss` pour le texte général  
-  - `functiongemma` pour le traitement d’images et textes combinés  
-  - `deepseek-ocr` pour extraire le texte depuis les captures d’écran  
-- **Librairies Python** : Pandas, Markdown, PDF generation, etc.  
+- **Ollama** pour gérer les modèles localement  
+- **Modèles IA** :  
+  - `gpt-oss` pour la génération de texte  
+  - `functiongemma` pour le traitement combiné texte + image  
+  - `deepseek-ocr` pour extraire du texte depuis les captures d’écran  
+- Librairies Python pour manipuler Markdown et générer le PDF  
 
-Le workflow concret :  
+Le workflow d’utilisation :  
 
 1. Lancer le serveur Ollama : `ollama serve`  
 2. Créer le template projet : `python3 main.py -create`  
-3. Générer le rapport depuis les données : `python3 main.py -generate projects/_customerName/_appName/`  
+3. Générer le rapport à partir des données : `python3 main.py -generate projects/_customerName/_appName/`  
 4. Modifier le Markdown si nécessaire et regénérer le PDF : `python3 main.py -generate_from_md projects/_customerName/_appName/`  
 
-Chaque vulnérabilité est stockée dans un sous-dossier avec description et captures d’écran, ce qui permet à l’IA de les traiter et de les intégrer automatiquement dans le rapport final.  
+Chaque vulnérabilité dispose d’un sous-dossier contenant la description, l’exploitation et les captures d’écran, ce qui permet à l’IA de les traiter et de produire un rapport complet automatiquement.
 
 ---
 
-## Points d’attention et améliorations futures
+## Challenges rencontrés
 
-- **Performance sur Mac** : sans GPU, certains modèles sont un peu lents. Le projet reste cependant utilisable et fonctionnel.  
-- **Personnalisation des rapports** : via `conf/agent.py` pour les prompts et `conf/style.css` pour le style du PDF.  
-- **Extension IA** : possibilité d’intégrer `llama3.2-vision` ou `gemma3:4b` pour mieux gérer les images et les graphiques dans les rapports.  
+Travailler sur Mac sans GPU puissant a imposé certaines contraintes : les modèles étaient plus lents et certains traitements d’images prenaient du temps. Cependant, l’utilisation d’Ollama permet de gérer ces limitations et de rester fonctionnel même sans carte graphique.  
+
+Le projet reste très flexible :  
+
+- Les prompts peuvent être personnalisés via `conf/agent.py` pour améliorer les résultats.  
+- Le style du PDF peut être modifié via `conf/style.css`.  
+- À terme, il sera possible d’intégrer des modèles plus avancés (`llama3.2-vision`, `gemma3:4b`) pour traiter les images et générer des graphiques plus complexes.
 
 ---
 
-## Conclusion
+## Ce que j’en retire
 
-Ce projet est un **exemple concret d’automatisation d’un processus complexe grâce à l’IA**. Il permet non seulement de gagner un temps précieux, mais aussi de créer des rapports plus cohérents et visuellement structurés. L’IA ne remplace pas l’auditeur, mais elle devient un assistant puissant pour toutes les tâches répétitives et de mise en forme.  
+Ce projet est un excellent exemple de **comment l’IA peut assister un expert en sécurité** :  
 
-Pour explorer le projet, le code est disponible sur GitHub : [AI-audit-report](https://github.com/julien-lair/AI-audit-report/).
+- Gain de temps considérable  
+- Rapport plus structuré et cohérent  
+- Possibilité de personnaliser et d’adapter selon le client ou l’exercice  
+
+L’IA n’a pas remplacé le travail d’audit, mais elle a été un assistant puissant pour automatiser les tâches répétitives et générer un produit final professionnel.  
+
+Le code est disponible sur GitHub si vous voulez explorer ou tester : [AI-audit-report](https://github.com/julien-lair/AI-audit-report/).
+
+---
+
+En résumé, ce projet combine **Pentest, Python et IA** pour transformer un processus manuel en un workflow automatisé et efficace — une belle expérience à mentionner sur un CV pour démontrer à la fois des compétences techniques et un esprit d’innovation.
