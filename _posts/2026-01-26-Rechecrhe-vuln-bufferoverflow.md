@@ -62,7 +62,7 @@ La vulnérabilité se trouve dans l'utilisation de `gets(locals.buffer)`, une fo
 
 ### Représentation mémoire
 
-![](/images/phoenux/stack-zero.png)
+![](/images/phoenix/stack-zero.png)
 
 La structure étant stockée de manière contiguë en mémoire, écrire au-delà de `buffer[64]` écrase directement la variable `changeme`.
 
@@ -98,7 +98,7 @@ La fonction `strcpy()` ne vérifie pas la taille de la destination, permettant l
 
 ### Représentation mémoire
 
-![](/images/phoenux/stack-one.png)
+![](/images/phoenix/stack-one.png)
 
 ### Considération de l'endianness
 
