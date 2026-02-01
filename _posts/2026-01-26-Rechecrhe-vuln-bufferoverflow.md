@@ -275,10 +275,9 @@ gdb ./stack-five
 b main #breakpoint au début de main
 r #run le program
 print (void *)getenv("SHELLCODE") #affiche adresse de la var
-
 (gdb) print (void *)getenv("SHELLCODE")
 $1 = (void *) 0x7fffffffc780
-``` 
+```
 
 #### Exploit
 On à ajouter 10000 instruction NOP avant notre shellcode pour avoir plus de chance de tomber sur la bonne adresse dû au décalage en mémoire.
