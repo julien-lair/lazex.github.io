@@ -87,6 +87,3 @@ L’IA n’a pas remplacé le travail d’audit, mais elle a été un assistant 
 
 Le code est disponible sur GitHub si vous voulez explorer ou tester : [AI-audit-report](https://github.com/julien-lair/AI-audit-report/).
 
----
-
-En résumé, ce projet combine **Pentest, Python et IA** pour transformer un processus manuel en un workflow automatisé et efficace — une belle expérience à mentionner sur un CV pour démontrer à la fois des compétences techniques et un esprit d’innovation.
