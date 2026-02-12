@@ -2,7 +2,7 @@
 title: Automatiser les rapports de Pentest grâce à l’IA
 date: 2026-01-25
 categories: [Dev, Python]
-tags: [python, ia, pentest]
+tags: [PYTHON, AI, PENTEST]
 ---
 
 # Automatiser les rapports de Pentest grâce à l’IA

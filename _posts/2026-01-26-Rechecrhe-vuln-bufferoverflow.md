@@ -1,8 +1,8 @@
 ---
 title: Exploitation de vulnérabilités binaires avec Phoenix
-date: 2026-01-25
+date: 2026-01-26
 categories: [Security, Reverse, Pentest]
-tags: [pentest, exploit, buffer-overflow, reverse, gdb, binary]
+tags: [PENTEST, EXPLOIT, BUFFER-OVERFLOW, REVERSE, GDB, BINARY]
 ---
 
 # Exploitation de vulnérabilités binaires avec Phoenix

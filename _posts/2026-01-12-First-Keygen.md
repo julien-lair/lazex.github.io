@@ -1,8 +1,8 @@
 ---
-title: Mon premier write-up du keygen
-date: 2026-01-14
+title: Write-up keygen 1
+date: 2026-01-12
 categories: [Reverse, x86]
-tags: [Reverse,x86, Keygen]     # TAG names should always be lowercase
+tags: [REVERSE,X86, KEYGEN]     # TAG names should always be lowercase
 ---
 Aujourd’hui, j’ai écrit mon premier write-up.  
 J’ai découvert le reverse il y a quelques mois, et je m’en suis passionné.
